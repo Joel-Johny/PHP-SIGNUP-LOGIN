@@ -1,5 +1,5 @@
 <?php
-
+include "./validations.php";
 
 session_start();
 if (isset($_SESSION['username'])) {
@@ -7,54 +7,24 @@ if (isset($_SESSION['username'])) {
     exit();
 }
 
-include "./connectdb.php";
-
 $validationResult=false;
 if($_SERVER["REQUEST_METHOD"]=="POST"){
 
-    $form_username=mysqli_real_escape_string($connection,$_POST["username"]) ;
-    $form_email=mysqli_real_escape_string($connection,$_POST["email"]);
-    $email_pattern = '/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/';
-    $whiteSpace='/\s/';
-    // $form_username = filter_var($_POST['username'], FILTER_SANITIZE_STRING);
-    // $form_email = filter_var($_POST['password'], FILTER_SANITIZE_STRING);
-    // echo "$form_username,$form_email <br>";
+    $form_username=$_POST["username"];
+    $form_email=$_POST["email"];
+    $form_password=$_POST["password"];
+    $form_c_password=$_POST["c-password"];
 
-    $form_password=mysqli_real_escape_string($connection,$_POST["password"]);
-    $form_c_password=mysqli_real_escape_string($connection,$_POST["c-password"]);
+    $validation_result=validations($form_email,$form_username,$form_password,$form_c_password);
 
-    // echo "$form_username $form_password $form_c_password";
+    // echo var_dump($validation_result["email"])."<br>";
+    // echo var_dump($validation_result["username"])."<br>";
+    // echo var_dump($validation_result["password"])."<br>";
+    // echo var_dump($validation_result["error_count"])."<br>";
 
-    if (empty($form_email)) 
-        $validationResult = "Email address can't be empty";
-    elseif (preg_match($whiteSpace, $form_email))
-        $validationResult="Please provide a email address without spaces ";
-    elseif (!preg_match($email_pattern, $form_email))
-        $validationResult="Please enter valid email address";
+    if($validation_result["error_count"]==0){
 
-    elseif(empty($form_username)) 
-        $validationResult = "Username can't be empty";
-    elseif (preg_match($whiteSpace, $form_username))
-        $validationResult="Please provide a username without spaces ";
-    elseif(strlen($form_username)<4)
-        $validationResult="Minimum length of username should be 4";
-
-    
-    elseif (empty($form_email)) 
-        $validationResult = "Email address can't be empty";
-    elseif (preg_match($whiteSpace, $form_email))
-        $validationResult="Please provide a email address without spaces ";
-    elseif (!preg_match($email_pattern, $form_email))
-        $validationResult="Please enter valid email address";
-    
-    elseif(strlen($form_password)<8)
-        $validationResult="Minimum password length should be 8";
-    
-    elseif($form_password!=$form_c_password)
-        $validationResult="Passwords do not match Please try again!";
-
-    else{
-
+        include "./connectdb.php";
         if($connection){
             // echo "Successful connection to db <br>";
 
@@ -71,16 +41,15 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
             if(mysqli_num_rows($result)==0){
     
                 $hashedPassword = password_hash($form_password, PASSWORD_DEFAULT);
-                // here 2
     
                 $savetoDb=$connection->prepare("INSERT INTO `user_details` (`email`, `user_id`, `password`) VALUES (?,?,?);");
                 $savetoDb->bind_param("sss",$form_email,$form_username,$hashedPassword);
-                $savetoDb->execute();
-
+                $save_result=$savetoDb->execute();
                 if($savetoDb)
                     $validationResult="Account created successfully.You can proceed to login !";
                 else
-                    $validationResult="Something went wrong. Please try again !".$connection->connect_error;
+                    $validationResult="Something went wrong. Please try again !";
+
             }
     
             else{
@@ -110,17 +79,30 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
     <form method="post" action="./register.php" class="flex-col-direction">
         <h3> REGISTER </h3>
         <input type="email" placeholder="Email" name="email" required>
+        <?php
+        if (!empty($validation_result["email"]))
+        foreach ($validation_result["email"] as $value) 
+            echo "<h6 class='validate'>$value</h6>";
+        ?>
+
         <input type="text" placeholder="Username" name="username" required>
+        <?php
+        if (!empty($validation_result["username"]))
+        foreach ($validation_result["username"] as $value) 
+            echo "<h6 class='validate'>$value</h6>";
+        ?>
+
         <input type="password" placeholder="Password" name="password" required>
         <input type="password" placeholder="Confirm Password" name="c-password" required>
+        <?php
+        if (!empty($validation_result["password"]))
+        foreach ($validation_result["password"] as $value) 
+            echo "<h6 class='validate'>$value</h6>";
+        ?>
+
         <button type="submit">REGISTER</button>
 
-        <?php
-            if($validationResult)
-                echo "<h5 class=validate>$validationResult</h5>";
-                // echo "<h5 class=\"validate\">$validationResult</h5>";
-            
-        ?>
+        <?php echo "<h5 class=result>$validationResult</h5>";?>
 
         <a href="./login.php">Already a User?</a>
 

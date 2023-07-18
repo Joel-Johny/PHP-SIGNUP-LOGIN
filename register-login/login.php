@@ -8,8 +8,8 @@ $validationResult=false;
 if($_SERVER["REQUEST_METHOD"]=="POST"){
     include "./connectdb.php";
 
-    $form_username=mysqli_real_escape_string($connection,$_POST["username"]);
-    $form_password=mysqli_real_escape_string($connection,$_POST["password"]);
+    $form_username=$_POST["username"];
+    $form_password=$_POST["password"];
 
     // echo "$form_username $form_password $form_c_password";
 
