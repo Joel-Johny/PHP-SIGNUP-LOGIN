@@ -1,66 +1,76 @@
 <?php
 include "./validations.php";
 
-session_start();
-if (isset($_SESSION['username'])) {
+if (isset($_COOKIE['PHPSESSID']))  {
     header('Location: dashboard.php');
     exit();
 }
 
-$dbCheck=false;
 if($_SERVER["REQUEST_METHOD"]=="POST"){
 
-    $form_username=$_POST["username"];
+    $form_username=trim($_POST["username"]);
     $form_email=$_POST["email"];
     $form_password=$_POST["password"];
     $form_c_password=$_POST["c-password"];
 
     $validation_result=validations($form_email,$form_username,$form_password,$form_c_password);
-
-    echo var_dump($validation_result)."<br>";
+    $ajax_response=array("success"=>false);
+    // echo var_dump($validation_result)."<br>";
     // echo var_dump($validation_result["username"])."<br>";
     // echo var_dump($validation_result["password"])."<br>";
     // echo var_dump($validation_result["error_count"])."<br>";
 
-    if($validation_result["error_count"]==0){
+    if(count($validation_result)==0){
 
         include "./connectdb.php";
         if($connection){
             // echo "Successful connection to db <br>";
+            // $duplicate_user_sql = $connection->prepare("SELECT *, 
+            // CASE 
+            //   WHEN `email` = ? THEN 'Email Address'
+            //   WHEN `user_id` = ? THEN 'Username'
+            // END AS duplicate_source 
+            // FROM `user_details` 
+            // WHERE `email` = ? OR `user_id` = ?");
 
-            $duplicate_user_sql = $connection->prepare("SELECT *, 
-            CASE 
-              WHEN `email` = ? THEN 'Email Address'
-              WHEN `user_id` = ? THEN 'Username'
-            END AS duplicate_source 
-            FROM `user_details` 
-            WHERE `email` = ? OR `user_id` = ?");
-            $duplicate_user_sql->bind_param("ssss", $form_email , $form_username , $form_email , $form_username);
+            $duplicate_user_sql =$connection->prepare("SELECT * FROM user_details WHERE email = ? OR username = ?;");
+            $duplicate_user_sql->bind_param("ss", $form_email , $form_username);
             $duplicate_user_sql->execute();
             $result = $duplicate_user_sql->get_result();
             if(mysqli_num_rows($result)==0){
     
                 $hashedPassword = password_hash($form_password, PASSWORD_DEFAULT);
     
-                $savetoDb=$connection->prepare("INSERT INTO `user_details` (`email`, `user_id`, `password`) VALUES (?,?,?);");
+                $savetoDb=$connection->prepare("INSERT INTO `user_details` (`email`, `username`, `password`) VALUES (?,?,?);");
                 $savetoDb->bind_param("sss",$form_email,$form_username,$hashedPassword);
                 $save_result=$savetoDb->execute();
-                if($savetoDb)
-                    $dbCheck="Account created successfully.You can proceed to login !";
+                if(!$savetoDb)
+                    $validation_result["dbValidation"]="Something went wrong. Please try again !";
                 else
-                    $dbCheck="Something went wrong. Please try again !";
-
+                    $ajax_response["success"]=true;
             }
     
             else{
-                $duplicate = mysqli_fetch_assoc($result)['duplicate_source'];
-                $dbCheck="$duplicate already exists!";
+                $duplicate = mysqli_fetch_assoc($result);
+
+                if($form_username==$duplicate['username'])
+                    $validation_result["dbValidation"]="Username already exists!";
+                else
+                    $validation_result["dbValidation"]="Email Address already exists!";
+
+
             }
         }
         else    
-            $dbCheck="Something went wrong. Please try again !";
+            $validation_result["dbValidation"]="Something went wrong. Please try again !";
+        
+        
     }
+if($ajax_response["success"]==false)
+    $ajax_response["validations"]=$validation_result;
 
+echo(json_encode($ajax_response));
+exit();
 }
    
 
@@ -76,26 +86,30 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
 </head>
 <body class="vh-align">
 
-    <form method="post" action="./register.php" class="flex-col-direction">
+    <form method="post" action="./register.php" class="flex-col-direction" id="register-form">
         <h3> REGISTER </h3>
 
         <input type="email" placeholder="Email" name="email" required>
-        <?php echo '<span class=\'validate\'>' . ((isset($validation_result["email"]))?$validation_result["email"]:"") . '</span>'; ?>
+        <span class="validate email-err"></span>
 
         <input type="text" placeholder="Username" name="username" required>
-        <?php echo '<span class=\'validate\'>' . ((isset($validation_result["username"]))?$validation_result["username"]:"") . '</span>'; ?>
+        <span  class="validate username-err"></span>
 
         <input type="password" placeholder="Password" name="password" required>
+        <span  class="validate password-err"></span>
+
         <input type="password" placeholder="Confirm Password" name="c-password" required>
-        <?php echo '<span class=\'validate\'>' .((isset($validation_result["password"]))?$validation_result["password"]:"") . '</span>'; ?>
+        <span  class="validate c-password-err"></span>
 
-        <button type="submit">REGISTER</button>
+        <button type="submit" id="form-submit">REGISTER</button>
 
-        <?php echo "<h5 class=result>$dbCheck</h5>";?>
+        <span class="validate dbValidation"></span>
 
         <a href="./login.php">Already a User?</a>
 
     </form>
-    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script src="./index.js"></script>
+
 </body>
 </html>

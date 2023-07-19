@@ -22,3 +22,4 @@ form>a{margin-left: auto;font-size: 14px;text-decoration: none;color: #3f51b5;}
 .validate:not(:empty){display: inline-block;}
 .result{text-align: center;color: red;}
 .logout{text-decoration: none;margin-top: 15px;}
+.dbValidation{text-align: center;font-size: 13px;}

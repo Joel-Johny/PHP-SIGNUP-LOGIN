@@ -1,6 +1,5 @@
 <?php
-session_start();
-if (!isset($_SESSION['username'])) {
+if (!isset($_COOKIE['PHPSESSID'])) {
     header('Location: login.php');
     exit();
 }
@@ -16,7 +15,7 @@ if (!isset($_SESSION['username'])) {
 </head>
 <body class="vh-align flex-col-direction">
     <?php
-    echo "<h1>Hello {$_SESSION["username"]}</h1>";
+    echo "<h1>Hello </h1>";
     ?>
     <a href="./logout.php" class="logout">LOG OUT</a>
 </body>
