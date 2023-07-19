@@ -14,10 +14,11 @@
 
 body{height: 100vh;font-family: "Montserrat";background-color: #f5f5f5;}
 
-form{width:375px; padding: 30px; gap: 15px;background-color: white;border-radius: 15px;}
+form{width:375px; padding: 30px; gap: 20px;background-color: white;border-radius: 15px;}
 form>input{    padding:10px;}
 form>button,.logout{    padding: 10px; background-color: #3f51b5;font-size: 16px; color: white; border: none; cursor: pointer;}
 form>a{margin-left: auto;font-size: 14px;text-decoration: none;color: #3f51b5;}
-.validate{color: red;}
+.validate{color: red;font-size: 12px;font-weight: bold;display: none;}
+.validate:not(:empty){display: inline-block;}
 .result{text-align: center;color: red;}
 .logout{text-decoration: none;margin-top: 15px;}

@@ -7,7 +7,7 @@ if (isset($_SESSION['username'])) {
     exit();
 }
 
-$validationResult=false;
+$dbCheck=false;
 if($_SERVER["REQUEST_METHOD"]=="POST"){
 
     $form_username=$_POST["username"];
@@ -17,7 +17,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
 
     $validation_result=validations($form_email,$form_username,$form_password,$form_c_password);
 
-    // echo var_dump($validation_result["email"])."<br>";
+    echo var_dump($validation_result)."<br>";
     // echo var_dump($validation_result["username"])."<br>";
     // echo var_dump($validation_result["password"])."<br>";
     // echo var_dump($validation_result["error_count"])."<br>";
@@ -46,19 +46,19 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
                 $savetoDb->bind_param("sss",$form_email,$form_username,$hashedPassword);
                 $save_result=$savetoDb->execute();
                 if($savetoDb)
-                    $validationResult="Account created successfully.You can proceed to login !";
+                    $dbCheck="Account created successfully.You can proceed to login !";
                 else
-                    $validationResult="Something went wrong. Please try again !";
+                    $dbCheck="Something went wrong. Please try again !";
 
             }
     
             else{
                 $duplicate = mysqli_fetch_assoc($result)['duplicate_source'];
-                $validationResult="$duplicate already exists!";
+                $dbCheck="$duplicate already exists!";
             }
         }
         else    
-            $validationResult="Something went wrong. Please try again !";
+            $dbCheck="Something went wrong. Please try again !";
     }
 
 }
@@ -78,31 +78,20 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
 
     <form method="post" action="./register.php" class="flex-col-direction">
         <h3> REGISTER </h3>
+
         <input type="email" placeholder="Email" name="email" required>
-        <?php
-        if (!empty($validation_result["email"]))
-        foreach ($validation_result["email"] as $value) 
-            echo "<h6 class='validate'>$value</h6>";
-        ?>
+        <?php echo '<span class=\'validate\'>' . ((isset($validation_result["email"]))?$validation_result["email"]:"") . '</span>'; ?>
 
         <input type="text" placeholder="Username" name="username" required>
-        <?php
-        if (!empty($validation_result["username"]))
-        foreach ($validation_result["username"] as $value) 
-            echo "<h6 class='validate'>$value</h6>";
-        ?>
+        <?php echo '<span class=\'validate\'>' . ((isset($validation_result["username"]))?$validation_result["username"]:"") . '</span>'; ?>
 
         <input type="password" placeholder="Password" name="password" required>
         <input type="password" placeholder="Confirm Password" name="c-password" required>
-        <?php
-        if (!empty($validation_result["password"]))
-        foreach ($validation_result["password"] as $value) 
-            echo "<h6 class='validate'>$value</h6>";
-        ?>
+        <?php echo '<span class=\'validate\'>' .((isset($validation_result["password"]))?$validation_result["password"]:"") . '</span>'; ?>
 
         <button type="submit">REGISTER</button>
 
-        <?php echo "<h5 class=result>$validationResult</h5>";?>
+        <?php echo "<h5 class=result>$dbCheck</h5>";?>
 
         <a href="./login.php">Already a User?</a>
 
