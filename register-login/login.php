@@ -28,18 +28,19 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
                     session_start();
                     // echo("<script>console.log('PHP session id: " . session_id() . "');</script>");
                     $_SESSION['id']=$recordFound["id"];
-                    header('Location: dashboard.php');
-                    exit();
+                    // header('Location: dashboard.php');
+                    $ajax_response["success"]=true;
+
                 }
                 else
-                    $ajax_response["login-err"]="Please check username and password!";
+                    $ajax_response["login-err"]="Please check username and password!";//if user if bound but incorrect pass
                     
             }
             else
-                $ajax_response["login-err"]="Please check username and password!";
+                $ajax_response["login-err"]="Please check username and password!";//if username does not exist
         }
         else    
-            $ajax_response["login-err"]="Something went wrong!";
+            $ajax_response["login-err"]="Something went wrong!";//problem connecting to db
         
         echo(json_encode($ajax_response));
         exit();

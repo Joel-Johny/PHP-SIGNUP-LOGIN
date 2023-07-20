@@ -42,18 +42,17 @@ $('#login-form').submit(function(event) {
         url: './login.php',
         data: formData,
         success:function(response){    
-            console.log(response)
-            // const json_response=JSON.parse(response);
+            // console.log(typeof(response))
+            const json_response=JSON.parse(response);
             // console.log(json_response)
-
             $('.validate').text("");
-        
-            if(json_response.success==false){
-                $('.login-err').text(json_response(json_response["login-err"]))
-                
-            }
-                
-        
+
+            if(json_response.success==true)
+                window.location.href="dashboard.php";
+            else
+                $('.login-err').text(json_response["login-err"])
+                  
+            
         }
     })
 
