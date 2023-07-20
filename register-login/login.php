@@ -63,7 +63,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
 
     <form method="post" action="./login.php" class="flex-col-direction" id="login-form">
         <h3> LOGIN </h3>
-        <input type="text" placeholder="Username" name="username" required>
+        <input type="text" placeholder="Username" name="username" size=30 required>
         <input type="password" placeholder="Password" name="password" required>
         <button type="submit">LOGIN</button>
         <span class="validate login-err"></span>

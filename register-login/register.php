@@ -69,8 +69,7 @@ if($_SERVER["REQUEST_METHOD"]=="POST"){
 if($ajax_response["success"]==false)
     $ajax_response["validations"]=$validation_result;
 
-echo(json_encode($ajax_response));
-exit();
+exit(json_encode($ajax_response));
 }
    
 
@@ -89,7 +88,7 @@ exit();
     <form method="post" action="./register.php" class="flex-col-direction" id="register-form">
         <h3> REGISTER </h3>
 
-        <input type="email" placeholder="Email" name="email" required>
+        <input type="email" placeholder="Email" name="email" size=35 required>
         <span class="validate email-err"></span>
 
         <input type="text" placeholder="Username" name="username" required>

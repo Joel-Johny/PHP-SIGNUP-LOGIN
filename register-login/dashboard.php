@@ -15,7 +15,13 @@ if (!isset($_COOKIE['PHPSESSID'])) {
 </head>
 <body class="vh-align flex-col-direction">
     <?php
-    echo "<h1>Hello </h1>";
+        include "./connectdb.php";
+        session_start();
+        $findUser_sql=$connection->prepare("SELECT * FROM `user_details` WHERE `id` = ?");
+        $findUser_sql->bind_param("i",$_SESSION['id']);
+        $findUser_sql->execute();
+        $recordFound=mysqli_fetch_assoc($findUser_sql->get_result()); 
+        echo "<h1>Hello user ->".$recordFound["username"]. "</h1>"
     ?>
     <a href="./logout.php" class="logout">LOG OUT</a>
 </body>

@@ -11,8 +11,16 @@ $('#register-form').submit(function(event) {
             const json_response=JSON.parse(response);
             $('.validate').text("");
             
-            if(json_response.success==true)
-                $('.dbValidation').text("Account created successfully! You can proceed to login.");
+            if(json_response.success==true){
+                $('.dbValidation').text("Account created successfully!");
+                $('#form-submit').prop('disabled', true);
+                $('#form-submit').text("Please wait...");
+
+                setTimeout(function() {
+                    window.location.href = "login.php";
+                }, 2000);
+
+            }
 
 
             else{
